@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Movies from "./components/Movies";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/common/Navbar";
 import Pagination from "./components/common/Pagination";
 import _ from "lodash";
 
@@ -82,10 +82,14 @@ class App extends Component {
       }
     ],
     pager: {
-      moviesPerPage: 8,
+      moviesPerPage: 2,
       paginatedMovies: [],
       noOfPages: 1,
       selectedPage: 1
+    },
+    genre: {
+      selectedGenre: "All",
+      genres: ["All", "Action", "Comedy", "Thriller"]
     }
   };
 
@@ -147,21 +151,43 @@ class App extends Component {
       pageCount * this.state.pager.moviesPerPage -
       this.state.pager.moviesPerPage;
     let endIndex = startIndex + this.state.pager.moviesPerPage; // here -1 is not done as slice not allow it
-    console.log(this.state.movies);
-    console.log(this.state.paginatedMovies);
     let newPager = this.state.pager;
-    newPager.paginatedMovies = this.state.movies.slice(startIndex, endIndex);
+    let filteredMovies = this.state.movies;
+    if (this.state.genre.selectedGenre !== "All") {
+      filteredMovies = this.state.movies.filter(movie => {
+        if (movie.genre.name === this.state.genre.selectedGenre) return movie;
+      });
+    }
+    let noOfPages = Math.ceil(
+      filteredMovies.length / this.state.pager.moviesPerPage
+    );
+    newPager.paginatedMovies = filteredMovies.slice(startIndex, endIndex);
     newPager.selectedPage = pageCount;
+    newPager.noOfPages = noOfPages;
     this.setState({
       pager: newPager
     });
+  };
+
+  genreHandler = genre => {
+    let newGenre = this.state.genre;
+    newGenre.selectedGenre = genre;
+    this.setState({ genre: newGenre });
+    let newPager = this.state.pager;
+    newPager.selectedPage = 1;
+    this.setState({ pager: newPager });
+    this.pageHandler(this.state.pager.selectedPage);
   };
 
   render() {
     return (
       <React.Fragment>
         <div className="container">
-          <Navbar movies={this.state.pager.paginatedMovies} />
+          <Navbar
+            totalMovies={this.state.movies.length}
+            genre={this.state.genre}
+            onGenre={this.genreHandler}
+          />
           {this.renderAppBody()}
           <Pagination
             pager={_.omit(this.state.pager, "paginatedMovies")}

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import _ from "lodash";
 
 class Pagination extends Component {
@@ -33,5 +34,14 @@ class Pagination extends Component {
     );
   }
 }
+
+Pagination.propTypes = {
+  pager: PropTypes.shape({
+    noOfPages: PropTypes.number.isRequired,
+    selectedPage: PropTypes.number.isRequired,
+    moviesPerPage: PropTypes.number
+  }),
+  onPage: PropTypes.func.isRequired
+};
 
 export default Pagination;
