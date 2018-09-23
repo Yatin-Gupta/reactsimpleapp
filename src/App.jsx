@@ -2,85 +2,14 @@ import React, { Component } from "react";
 import Movies from "./components/Movies";
 import Navbar from "./components/common/Navbar";
 import Pagination from "./components/common/Pagination";
+import { getMovies } from "./services/movies.service";
+import { getGenres } from "./services/genres.service";
 import _ from "lodash";
+import TableHeader from "./components/TableHeader";
 
 class App extends Component {
   state = {
-    movies: [
-      {
-        _id: "5b21ca3eeb7f6fbccd471815",
-        title: "Terminator",
-        genre: { _id: "5b21ca3eeb7f6fbccd471818", name: "Action" },
-        numberInStock: 6,
-        dailyRentalRate: 2.5,
-        publishDate: "2018-01-03T19:04:28.809Z",
-        likestatus: 0
-      },
-      {
-        _id: "5b21ca3eeb7f6fbccd471816",
-        title: "Die Hard",
-        genre: { _id: "5b21ca3eeb7f6fbccd471818", name: "Action" },
-        numberInStock: 5,
-        dailyRentalRate: 2.5,
-        likestatus: 0
-      },
-      {
-        _id: "5b21ca3eeb7f6fbccd471817",
-        title: "Get Out",
-        genre: { _id: "5b21ca3eeb7f6fbccd471820", name: "Thriller" },
-        numberInStock: 8,
-        dailyRentalRate: 3.5,
-        likestatus: 1
-      },
-      {
-        _id: "5b21ca3eeb7f6fbccd471819",
-        title: "Trip to Italy",
-        genre: { _id: "5b21ca3eeb7f6fbccd471814", name: "Comedy" },
-        numberInStock: 7,
-        dailyRentalRate: 3.5,
-        likestatus: 1
-      },
-      {
-        _id: "5b21ca3eeb7f6fbccd47181a",
-        title: "Airplane",
-        genre: { _id: "5b21ca3eeb7f6fbccd471814", name: "Comedy" },
-        numberInStock: 7,
-        dailyRentalRate: 3.5,
-        likestatus: 0
-      },
-      {
-        _id: "5b21ca3eeb7f6fbccd47181b",
-        title: "Wedding Crashers",
-        genre: { _id: "5b21ca3eeb7f6fbccd471814", name: "Comedy" },
-        numberInStock: 7,
-        dailyRentalRate: 3.5,
-        likestatus: 0
-      },
-      {
-        _id: "5b21ca3eeb7f6fbccd47181e",
-        title: "Gone Girl",
-        genre: { _id: "5b21ca3eeb7f6fbccd471820", name: "Thriller" },
-        numberInStock: 7,
-        dailyRentalRate: 4.5,
-        likestatus: 0
-      },
-      {
-        _id: "5b21ca3eeb7f6fbccd47181f",
-        title: "The Sixth Sense",
-        genre: { _id: "5b21ca3eeb7f6fbccd471820", name: "Thriller" },
-        numberInStock: 4,
-        dailyRentalRate: 3.5,
-        likestatus: 0
-      },
-      {
-        _id: "5b21ca3eeb7f6fbccd471821",
-        title: "The Avengers",
-        genre: { _id: "5b21ca3eeb7f6fbccd471818", name: "Action" },
-        numberInStock: 7,
-        dailyRentalRate: 3.5,
-        likestatus: 0
-      }
-    ],
+    movies: getMovies(),
     pager: {
       moviesPerPage: 2,
       paginatedMovies: [],
@@ -89,7 +18,16 @@ class App extends Component {
     },
     genre: {
       selectedGenre: "All",
-      genres: ["All", "Action", "Comedy", "Thriller"]
+      genres: getGenres()
+    },
+    sorter: {
+      fields: [
+        { name: "title", order: "no" },
+        { name: "genre", order: "no" },
+        { name: "numberInStock", order: "no" },
+        { name: "dailyRentalRate", order: "no" }
+      ],
+      activeField: "title"
     }
   };
 
@@ -107,6 +45,25 @@ class App extends Component {
     );
   }
 
+  toggleHandler = header => {
+    let newFields = this.state.sorter.fields.map(field => {
+      if (field.name === header) {
+        if (field.order === "no") {
+          field.order = "asc";
+        } else {
+          field.order = field.order === "asc" ? "desc" : "asc";
+        }
+        this.state.sorter.activeField = field.name;
+      } else {
+        field.order = "no";
+      }
+      return field;
+    });
+    this.state.sorter.fields = newFields;
+    this.setState({ sorter: this.state.sorter });
+    this.pageHandler(this.state.pager.selectedPage);
+  };
+
   renderAppBody() {
     let countMovies = this.state.pager.paginatedMovies.length;
     if (countMovies === 0) {
@@ -116,15 +73,10 @@ class App extends Component {
       <React.Fragment>
         <table className="table">
           <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Title</th>
-              <th scope="col">Genre</th>
-              <th scope="col">Stock</th>
-              <th scope="col">Rate</th>
-              <th scope="col">&nbsp;</th>
-              <th scope="col">&nbsp;</th>
-            </tr>
+            <TableHeader
+              sorter={this.state.sorter}
+              onToggle={this.toggleHandler}
+            />
           </thead>
           <tbody>
             <Movies pager={this.state.pager} onLike={this.likeHandler} />
@@ -158,10 +110,38 @@ class App extends Component {
         if (movie.genre.name === this.state.genre.selectedGenre) return movie;
       });
     }
-    let noOfPages = Math.ceil(
-      filteredMovies.length / this.state.pager.moviesPerPage
+    let sortField = _.find(
+      this.state.sorter.fields,
+      "name",
+      this.state.sorter.activeField
     );
-    newPager.paginatedMovies = filteredMovies.slice(startIndex, endIndex);
+    console.log(this.state.sorter.activeField);
+    let sortedFilteredMovies = filteredMovies;
+    if (sortField.order != "no") {
+      let tempFilteredMovies = filteredMovies.map(movie => {
+        if (sortField.name === "genre") {
+          movie["sortField"] = ("" + movie[sortField.name].name).toLowerCase();
+          return movie;
+        }
+        movie["sortField"] = ("" + movie[sortField.name]).toLowerCase();
+        return movie;
+      });
+      let sortedTempFilteredMovies = _.orderBy(
+        tempFilteredMovies,
+        "sortField",
+        sortField.order
+      );
+      sortedFilteredMovies = sortedTempFilteredMovies.map(movie => {
+        return _.omit(movie, "sortField");
+      });
+    }
+    console.log(sortedFilteredMovies);
+    let noOfPages = Math.ceil(
+      sortedFilteredMovies.length / this.state.pager.moviesPerPage
+    );
+    console.log("startIndex: ", startIndex);
+    console.log("endIndex: ", endIndex);
+    newPager.paginatedMovies = sortedFilteredMovies.slice(startIndex, endIndex);
     newPager.selectedPage = pageCount;
     newPager.noOfPages = noOfPages;
     this.setState({
