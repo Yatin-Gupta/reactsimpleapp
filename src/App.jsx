@@ -11,7 +11,7 @@ class App extends Component {
   state = {
     movies: getMovies(),
     pager: {
-      moviesPerPage: 2,
+      moviesPerPage: 4,
       paginatedMovies: [],
       noOfPages: 1,
       selectedPage: 1
@@ -22,10 +22,10 @@ class App extends Component {
     },
     sorter: {
       fields: [
-        { name: "title", order: "no" },
-        { name: "genre", order: "no" },
-        { name: "numberInStock", order: "no" },
-        { name: "dailyRentalRate", order: "no" }
+        { name: "title", label: "Title", order: "no" },
+        { name: "genre", label: "Genre", order: "no" },
+        { name: "numberInStock", label: "Stock", order: "no" },
+        { name: "dailyRentalRate", label: "Rate", order: "no" }
       ],
       activeField: "title"
     }
@@ -46,6 +46,7 @@ class App extends Component {
   }
 
   toggleHandler = header => {
+    let newSorter = this.state.sorter;
     let newFields = this.state.sorter.fields.map(field => {
       if (field.name === header) {
         if (field.order === "no") {
@@ -53,14 +54,15 @@ class App extends Component {
         } else {
           field.order = field.order === "asc" ? "desc" : "asc";
         }
-        this.state.sorter.activeField = field.name;
+        newSorter.activeField = field.name;
       } else {
         field.order = "no";
       }
       return field;
     });
-    this.state.sorter.fields = newFields;
-    this.setState({ sorter: this.state.sorter });
+    newSorter.fields = newFields;
+    this.setState({ sorter: newSorter });
+
     this.pageHandler(this.state.pager.selectedPage);
   };
 
@@ -110,14 +112,21 @@ class App extends Component {
         if (movie.genre.name === this.state.genre.selectedGenre) return movie;
       });
     }
-    let sortField = _.find(
-      this.state.sorter.fields,
-      "name",
-      this.state.sorter.activeField
-    );
+    let thisSorter = this.state.sorter;
+    console.log(thisSorter.activeField);
+    let sortField = {};
+    // let sortField = _.find(this.state.sorter.fields, "name", {
+    //   activeField: this.state.sorter.activeField
+    // });
+    thisSorter.fields.forEach(field => {
+      if (thisSorter.activeField === field.name) {
+        sortField = field;
+      }
+    });
+    console.log(sortField);
     console.log(this.state.sorter.activeField);
     let sortedFilteredMovies = filteredMovies;
-    if (sortField.order != "no") {
+    if (sortField.order !== "no") {
       let tempFilteredMovies = filteredMovies.map(movie => {
         if (sortField.name === "genre") {
           movie["sortField"] = ("" + movie[sortField.name].name).toLowerCase();

@@ -13,7 +13,7 @@ class TableHeader extends Component {
               key={field.name}
               onClick={() => this.props.onToggle(field.name)}
             >
-              {field.name.toUpperCase()}
+              {field.label}
             </th>
           ))}
           <th scope="col">&nbsp;</th>
