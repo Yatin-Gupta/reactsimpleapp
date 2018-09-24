@@ -16,11 +16,11 @@ class Movies extends Component {
 
   render() {
     let pager = this.props.pager;
-    this.counter =
-      pager.selectedPage * pager.moviesPerPage - pager.moviesPerPage;
+    let movies = this.props.movies;
+    this.counter = (pager.selectedPage - 1) * pager.moviesPerPage;
     return (
       <React.Fragment>
-        {pager.paginatedMovies.map(movie => (
+        {movies.map(movie => (
           <tr key={movie.title}>
             <Movie
               movie={movie}

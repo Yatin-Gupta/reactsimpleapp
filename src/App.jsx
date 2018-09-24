@@ -6,68 +6,68 @@ import { getMovies } from "./services/movies.service";
 import { getGenres } from "./services/genres.service";
 import _ from "lodash";
 import TableHeader from "./components/TableHeader";
+import paginate from "./utils/paginate";
+import sortData from "./utils/sort";
 
 class App extends Component {
+  movies = [];
   state = {
-    movies: getMovies(),
-    pager: {
-      moviesPerPage: 4,
-      paginatedMovies: [],
-      noOfPages: 1,
-      selectedPage: 1
-    },
+    renderMovies: [],
     genre: {
       selectedGenre: "All",
       genres: getGenres()
-    },
-    sorter: {
-      fields: [
-        { name: "title", label: "Title", order: "no" },
-        { name: "genre", label: "Genre", order: "no" },
-        { name: "numberInStock", label: "Stock", order: "no" },
-        { name: "dailyRentalRate", label: "Rate", order: "no" }
-      ],
-      activeField: "title"
     }
+  };
+
+  sorter = {
+    fields: [
+      { name: "title", label: "Title", order: "no" },
+      { name: "genre", label: "Genre", order: "no" },
+      { name: "numberInStock", label: "Stock", order: "no" },
+      { name: "dailyRentalRate", label: "Rate", order: "no" }
+    ],
+    activeField: "title"
+  };
+
+  pager = {
+    moviesPerPage: 4,
+    noOfPages: 1,
+    selectedPage: 1
   };
 
   constructor() {
     super();
-    this.state.pager.paginatedMovies = this.state.movies.slice(
-      0,
-      this.state.pager.moviesPerPage
-    );
+    this.movies = getMovies();
+    this.state.renderMovies = this.movies.slice(0, this.pager.moviesPerPage);
     //console.log(this.state.pager.paginatedMovies[0] === this.state.movies[0]);true;//this adds
     // advantage that if paginatedMovies object is changed then movies object also get changed
     // automatically.
-    this.state.pager.noOfPages = Math.ceil(
-      this.state.movies.length / this.state.pager.moviesPerPage
+    this.pager.noOfPages = Math.ceil(
+      this.movies.length / this.pager.moviesPerPage
     );
   }
 
-  toggleHandler = header => {
-    let newSorter = this.state.sorter;
-    let newFields = this.state.sorter.fields.map(field => {
-      if (field.name === header) {
+  toggleHandler = clickedHead => {
+    let newFields = this.sorter.fields.map(field => {
+      if (field.name === clickedHead) {
         if (field.order === "no") {
           field.order = "asc";
         } else {
           field.order = field.order === "asc" ? "desc" : "asc";
         }
-        newSorter.activeField = field.name;
+        this.sorter.activeField = field.name;
       } else {
         field.order = "no";
       }
       return field;
     });
-    newSorter.fields = newFields;
-    this.setState({ sorter: newSorter });
+    this.sorter.fields = newFields;
 
-    this.pageHandler(this.state.pager.selectedPage);
+    this.pageHandler(this.pager.selectedPage);
   };
 
   renderAppBody() {
-    let countMovies = this.state.pager.paginatedMovies.length;
+    let countMovies = this.state.renderMovies.length;
     if (countMovies === 0) {
       return;
     }
@@ -75,13 +75,14 @@ class App extends Component {
       <React.Fragment>
         <table className="table">
           <thead>
-            <TableHeader
-              sorter={this.state.sorter}
-              onToggle={this.toggleHandler}
-            />
+            <TableHeader sorter={this.sorter} onToggle={this.toggleHandler} />
           </thead>
           <tbody>
-            <Movies pager={this.state.pager} onLike={this.likeHandler} />
+            <Movies
+              pager={this.pager}
+              onLike={this.likeHandler}
+              movies={this.state.renderMovies}
+            />
           </tbody>
         </table>
       </React.Fragment>
@@ -89,72 +90,38 @@ class App extends Component {
   }
 
   likeHandler = id => {
-    let changedMovies = this.state.pager.paginatedMovies.map(movie => {
-      if (movie._id === id) {
-        movie.likestatus = movie.likestatus === 1 ? 0 : 1;
-      }
-      return movie;
-    });
-    let newPager = this.state.pager;
-    newPager.paginatedMovies = changedMovies;
-    this.setState({ pager: newPager });
+    let index = _.findIndex(this.movies, { _id: id });
+    this.movies[index]["likestatus"] =
+      this.movies[index]["likestatus"] === 1 ? 0 : 1;
+    //let newPager = this.state.pager;
+    //newPager.paginatedMovies = changedMovies;
+    this.pageHandler(this.pager.selectedPage);
   };
 
   pageHandler = pageCount => {
-    let startIndex =
-      pageCount * this.state.pager.moviesPerPage -
-      this.state.pager.moviesPerPage;
-    let endIndex = startIndex + this.state.pager.moviesPerPage; // here -1 is not done as slice not allow it
-    let newPager = this.state.pager;
-    let filteredMovies = this.state.movies;
-    if (this.state.genre.selectedGenre !== "All") {
-      filteredMovies = this.state.movies.filter(movie => {
+    const thisState = this.state;
+    let filteredMovies = this.movies;
+    if (thisState.genre.selectedGenre !== "All") {
+      filteredMovies = this.movies.filter(movie => {
         if (movie.genre.name === this.state.genre.selectedGenre) return movie;
       });
     }
-    let thisSorter = this.state.sorter;
-    console.log(thisSorter.activeField);
-    let sortField = {};
-    // let sortField = _.find(this.state.sorter.fields, "name", {
-    //   activeField: this.state.sorter.activeField
-    // });
-    thisSorter.fields.forEach(field => {
-      if (thisSorter.activeField === field.name) {
-        sortField = field;
-      }
+    let sortedFilteredMovies = sortData(filteredMovies, this.sorter, {
+      genre: "name"
     });
-    console.log(sortField);
-    console.log(this.state.sorter.activeField);
-    let sortedFilteredMovies = filteredMovies;
-    if (sortField.order !== "no") {
-      let tempFilteredMovies = filteredMovies.map(movie => {
-        if (sortField.name === "genre") {
-          movie["sortField"] = ("" + movie[sortField.name].name).toLowerCase();
-          return movie;
-        }
-        movie["sortField"] = ("" + movie[sortField.name]).toLowerCase();
-        return movie;
-      });
-      let sortedTempFilteredMovies = _.orderBy(
-        tempFilteredMovies,
-        "sortField",
-        sortField.order
-      );
-      sortedFilteredMovies = sortedTempFilteredMovies.map(movie => {
-        return _.omit(movie, "sortField");
-      });
-    }
-    console.log(sortedFilteredMovies);
-    let noOfPages = Math.ceil(
-      sortedFilteredMovies.length / this.state.pager.moviesPerPage
+    let resultPager = paginate(
+      sortedFilteredMovies.length,
+      pageCount,
+      this.pager.moviesPerPage
     );
-    console.log("startIndex: ", startIndex);
-    console.log("endIndex: ", endIndex);
-    newPager.paginatedMovies = sortedFilteredMovies.slice(startIndex, endIndex);
-    newPager.selectedPage = pageCount;
-    newPager.noOfPages = noOfPages;
+    this.pager.selectedPage = pageCount;
+    this.pager.noOfPages = resultPager.noOfPages;
+
     this.setState({
-      pager: newPager
+      renderMovies: sortedFilteredMovies.slice(
+        resultPager.startIndex,
+        resultPager.endIndex
+      )
     });
   };
 
@@ -162,10 +129,8 @@ class App extends Component {
     let newGenre = this.state.genre;
     newGenre.selectedGenre = genre;
     this.setState({ genre: newGenre });
-    let newPager = this.state.pager;
-    newPager.selectedPage = 1;
-    this.setState({ pager: newPager });
-    this.pageHandler(this.state.pager.selectedPage);
+    this.pager.selectedPage = 1;
+    this.pageHandler(this.pager.selectedPage);
   };
 
   render() {
@@ -173,15 +138,12 @@ class App extends Component {
       <React.Fragment>
         <div className="container">
           <Navbar
-            totalMovies={this.state.movies.length}
+            totalMovies={this.movies.length}
             genre={this.state.genre}
             onGenre={this.genreHandler}
           />
           {this.renderAppBody()}
-          <Pagination
-            pager={_.omit(this.state.pager, "paginatedMovies")}
-            onPage={this.pageHandler}
-          />
+          <Pagination pager={this.pager} onPage={this.pageHandler} />
         </div>
       </React.Fragment>
     );
