@@ -8,21 +8,23 @@ class Genre extends Component {
   render() {
     const { genres, selectedGenre } = this.props.genre;
     return (
-      <div>
-        {genres.map(genre => (
-          <button
-            className={
-              selectedGenre === genre
-                ? "btn btn-primary m-2"
-                : "btn btn-default m-2"
-            }
-            key={genre}
-            onClick={() => this.props.onGenre(genre)}
-          >
-            {genre}
-          </button>
-        ))}
-      </div>
+      <React.Fragment>
+        <ul class="list-group">
+          {genres.map(genre => (
+            <li
+              key={genre}
+              onClick={() => this.props.onGenre(genre)}
+              className={
+                selectedGenre === genre
+                  ? "list-group-item active"
+                  : "list-group-item"
+              }
+            >
+              {genre}
+            </li>
+          ))}
+        </ul>
+      </React.Fragment>
     );
   }
 }
