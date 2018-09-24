@@ -9,7 +9,7 @@ class Genre extends Component {
     const { genres, selectedGenre } = this.props.genre;
     return (
       <React.Fragment>
-        <ul class="list-group">
+        <ul className="list-group">
           {genres.map(genre => (
             <li
               key={genre}

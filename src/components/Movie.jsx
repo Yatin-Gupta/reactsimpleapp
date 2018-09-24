@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Like from "./common/Like";
+import { Link } from "react-router-dom";
 
 class Movie extends Component {
   render() {
@@ -14,7 +15,9 @@ class Movie extends Component {
     return (
       <React.Fragment>
         <th scope="row">{this.props.counter}</th>
-        <td>{title}</td>
+        <td>
+          <Link to={"/movie/" + title}>{title}</Link>
+        </td>
         <td>{genre.name}</td>
         <td>{numberInStock}</td>
         <td>{dailyRentalRate}</td>

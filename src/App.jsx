@@ -11,6 +11,7 @@ import Customers from "./components/Customers";
 import Rentals from "./components/Rentals";
 import NotFound from "./components/NotFound";
 import { Route, Redirect, Switch } from "react-router-dom";
+import MovieForm from "./components/MovieForm";
 
 class App extends Component {
   movies = [];
@@ -139,6 +140,10 @@ class App extends Component {
             />
             <Route path="/customers" component={Customers} />
             <Route path="/rentals" component={Rentals} />
+            <Route
+              path="/movie/:name"
+              render={props => <MovieForm movies={this.movies} {...props} />}
+            />
             <Route path="/not-found" component={NotFound} />
             <Redirect from="/" exact to="/movies" />
             <Redirect to="/not-found" />
