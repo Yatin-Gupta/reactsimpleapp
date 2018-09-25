@@ -117,23 +117,27 @@ class App extends Component {
   };
 
   addMovieHandler = movie => {
-    this.state.movies.push(movie);
+    let saveMovie = {};
+    saveMovie._id = Date.now().toString();
+    saveMovie.title = movie.title;
+    saveMovie.numberInStock = movie.noInStock;
+    saveMovie.dailyRentalRate = movie.rate;
+    let i = 0;
+    for (let i = 0; i < this.movies.length; ++i) {
+      if (this.movies[i].genre.name === movie.genre) {
+        saveMovie.genre = this.movies[i].genre;
+        break;
+      }
+    }
+    this.movies.push(saveMovie);
   };
 
   render() {
-    if (this.props.setMovies !== undefined) {
-      console.log("Come here");
-      return;
-    }
     return (
       <React.Fragment>
         <div className="container">
           <Navbar totalMovies={this.movies.length} />
           <Switch>
-            <Route
-              path="/get-movies"
-              render={props => <App {...props} setMovies="true" />}
-            />
             <Route
               path="/movies/new"
               render={props => (

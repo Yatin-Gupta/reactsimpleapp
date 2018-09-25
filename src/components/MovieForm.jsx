@@ -66,14 +66,10 @@ class MovieForm extends Component {
       errors[error.key] = error.value;
     });
     this.setState({ errors });
-    if (errors.length === 0) {
-      <Redirect
-        to={{
-          pathname: "/get-movies",
-          movie: { ...this.state.account }
-        }}
-      />;
+    if (formErrors.length === 0) {
+      this.props.onAdd(this.state.account);
     }
+    this.props.history.replace("/movies");
     // call to server made
   };
 

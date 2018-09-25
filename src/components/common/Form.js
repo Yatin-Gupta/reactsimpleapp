@@ -19,8 +19,6 @@ const validateField = (
   schema,
   mappings = { abortEarly: true }
 ) => {
-  console.log(fieldObject);
-  console.log(schema);
   let result = Joi.validate(fieldObject, schema, mappings);
   let error = {};
   if (result.error) {
