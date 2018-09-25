@@ -16,6 +16,12 @@ class Body extends Component {
             <Genre genre={this.props.genre} onGenre={this.props.onGenre} />
           </div>
           <div className="col">
+            <button
+              className="btn btn-primary"
+              onClick={() => this.props.history.push("/movies/new")}
+            >
+              New
+            </button>
             <table className="table">
               <thead>
                 <TableHeader

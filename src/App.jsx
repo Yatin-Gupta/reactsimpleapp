@@ -13,6 +13,7 @@ import NotFound from "./components/NotFound";
 import { Route, Redirect, Switch } from "react-router-dom";
 import MovieForm from "./components/MovieForm";
 import Login from "./components/Login";
+import Register from "./components/Register";
 
 class App extends Component {
   movies = [];
@@ -115,12 +116,22 @@ class App extends Component {
     this.pageHandler(this.pager.selectedPage);
   };
 
+  addMovieHandler = movie => {
+    this.state.movies.push(movie);
+  };
+
   render() {
     return (
       <React.Fragment>
         <div className="container">
           <Navbar totalMovies={this.movies.length} />
           <Switch>
+            <Route
+              path="/movies/new"
+              render={props => (
+                <MovieForm {...props} onAdd={this.addMovieHandler} />
+              )}
+            />
             <Route
               path="/movies"
               render={props => (
@@ -140,6 +151,7 @@ class App extends Component {
               )}
             />
             <Route path="/login" component={Login} />
+            <Route path="/register" component={Register} />
             <Route path="/customers" component={Customers} />
             <Route path="/rentals" component={Rentals} />
             <Route
