@@ -121,11 +121,19 @@ class App extends Component {
   };
 
   render() {
+    if (this.props.setMovies !== undefined) {
+      console.log("Come here");
+      return;
+    }
     return (
       <React.Fragment>
         <div className="container">
           <Navbar totalMovies={this.movies.length} />
           <Switch>
+            <Route
+              path="/get-movies"
+              render={props => <App {...props} setMovies="true" />}
+            />
             <Route
               path="/movies/new"
               render={props => (
