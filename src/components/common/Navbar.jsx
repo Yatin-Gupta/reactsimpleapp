@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Genre from "./Genre";
+import { Route } from "react-router-dom";
 
 class Navbar extends Component {
   renderNavigationBar(moviesCount) {
