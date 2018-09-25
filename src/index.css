@@ -3,3 +3,15 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+
+a.nav-link.active {
+  font-weight: bold;
+}
+
+li.list-group-item {
+  cursor: pointer;
+}
+
+i[class*="fa-heart"] {
+  cursor: pointer;
+}

@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import Genre from "./Genre";
-import { Route } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 
 class Navbar extends Component {
   renderNavigationBar(moviesCount) {
@@ -13,10 +12,31 @@ class Navbar extends Component {
   render() {
     return (
       <React.Fragment>
-        <nav className="navbar navbar-light bg-light">
-          {this.renderNavigationBar(this.props.totalMovies)}
-          <Genre genre={this.props.genre} onGenre={this.props.onGenre} />
+        <nav className="navbar navbar-expand-lg navbar-light bg-light">
+          <Link className="navbar-brand" to="/">
+            Yatin
+          </Link>
+          <div className="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul className="navbar-nav mr-auto">
+              <li className="nav-item active">
+                <NavLink className="nav-link" to="/movies">
+                  Movies
+                </NavLink>
+              </li>
+              <li className="nav-item active">
+                <NavLink className="nav-link" to="/customers">
+                  Customers
+                </NavLink>
+              </li>
+              <li className="nav-item active">
+                <NavLink className="nav-link" to="/rentals">
+                  Rentals
+                </NavLink>
+              </li>
+            </ul>
+          </div>
         </nav>
+        <div>&nbsp;</div>
       </React.Fragment>
     );
   }

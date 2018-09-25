@@ -1,13 +1,17 @@
 import React, { Component } from "react";
-import Movies from "./components/Movies";
 import Navbar from "./components/common/Navbar";
 import Pagination from "./components/common/Pagination";
 import { getMovies } from "./services/movies.service";
 import { getGenres } from "./services/genres.service";
 import _ from "lodash";
-import TableHeader from "./components/TableHeader";
 import paginate from "./utils/paginate";
 import sortData from "./utils/sort";
+import Body from "./components/Body";
+import Customers from "./components/Customers";
+import Rentals from "./components/Rentals";
+import NotFound from "./components/NotFound";
+import { Route, Redirect, Switch } from "react-router-dom";
+import MovieForm from "./components/MovieForm";
 
 class App extends Component {
   movies = [];
@@ -66,29 +70,6 @@ class App extends Component {
     this.pageHandler(this.pager.selectedPage);
   };
 
-  renderAppBody() {
-    let countMovies = this.state.renderMovies.length;
-    if (countMovies === 0) {
-      return;
-    }
-    return (
-      <React.Fragment>
-        <table className="table">
-          <thead>
-            <TableHeader sorter={this.sorter} onToggle={this.toggleHandler} />
-          </thead>
-          <tbody>
-            <Movies
-              pager={this.pager}
-              onLike={this.likeHandler}
-              movies={this.state.renderMovies}
-            />
-          </tbody>
-        </table>
-      </React.Fragment>
-    );
-  }
-
   likeHandler = id => {
     let index = _.findIndex(this.movies, { _id: id });
     this.movies[index]["likestatus"] =
@@ -137,13 +118,36 @@ class App extends Component {
     return (
       <React.Fragment>
         <div className="container">
-          <Navbar
-            totalMovies={this.movies.length}
-            genre={this.state.genre}
-            onGenre={this.genreHandler}
-          />
-          {this.renderAppBody()}
-          <Pagination pager={this.pager} onPage={this.pageHandler} />
+          <Navbar totalMovies={this.movies.length} />
+          <Switch>
+            <Route
+              path="/movies"
+              render={props => (
+                <React.Fragment>
+                  <Body
+                    renderMovies={this.state.renderMovies}
+                    genre={this.state.genre}
+                    onGenre={this.genreHandler}
+                    sorter={this.sorter}
+                    pager={this.pager}
+                    onLike={this.likeHandler}
+                    onToggle={this.toggleHandler}
+                    {...props}
+                  />
+                  <Pagination pager={this.pager} onPage={this.pageHandler} />
+                </React.Fragment>
+              )}
+            />
+            <Route path="/customers" component={Customers} />
+            <Route path="/rentals" component={Rentals} />
+            <Route
+              path="/movie/:name"
+              render={props => <MovieForm movies={this.movies} {...props} />}
+            />
+            <Route path="/not-found" component={NotFound} />
+            <Redirect from="/" exact to="/movies" />
+            <Redirect to="/not-found" />
+          </Switch>
         </div>
       </React.Fragment>
     );
