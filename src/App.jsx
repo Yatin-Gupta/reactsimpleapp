@@ -12,6 +12,7 @@ import Rentals from "./components/Rentals";
 import NotFound from "./components/NotFound";
 import { Route, Redirect, Switch } from "react-router-dom";
 import MovieForm from "./components/MovieForm";
+import Login from "./components/Login";
 
 class App extends Component {
   movies = [];
@@ -138,6 +139,7 @@ class App extends Component {
                 </React.Fragment>
               )}
             />
+            <Route path="/login" component={Login} />
             <Route path="/customers" component={Customers} />
             <Route path="/rentals" component={Rentals} />
             <Route
