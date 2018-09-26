@@ -41,6 +41,8 @@ class App extends Component {
     selectedPage: 1
   };
 
+  searchString = "";
+
   constructor() {
     super();
     this.movies = getMovies();
@@ -81,11 +83,19 @@ class App extends Component {
     this.pageHandler(this.pager.selectedPage);
   };
 
-  pageHandler = pageCount => {
+  pageHandler = (pageCount = 1) => {
     const thisState = this.state;
-    let filteredMovies = this.movies;
+    let actualMovies = [];
+    if (this.searchString.trim() === "") {
+      actualMovies = this.movies;
+    } else {
+      actualMovies = this.movies.filter(movie => {
+        return movie.title.indexOf(this.searchString) > -1;
+      });
+    }
+    let filteredMovies = actualMovies;
     if (thisState.genre.selectedGenre !== "All") {
-      filteredMovies = this.movies.filter(movie => {
+      filteredMovies = filteredMovies.filter(movie => {
         if (movie.genre.name === this.state.genre.selectedGenre) return movie;
       });
     }
@@ -132,14 +142,31 @@ class App extends Component {
   };
 
   getMovieHandler = movieTitle => {
-    for (let i = 0; i < this.movies.length; ++i) {
+    let noOfMovies = this.movies.length;
+    for (let i = 0; i < noOfMovies; ++i) {
       if (this.movies[i].title === movieTitle) {
         return this.movies[i];
       }
     }
     return {};
   };
+  editHandler = movie => {
+    let saveMovie = {};
+    for (let i = 0; i < this.movies.length; ++i) {
+      if (this.movies[i]._id === movie.id) {
+        this.movies[i].title = movie.title;
+        this.movies[i].numberInStock = movie.noInStock;
+        this.movies[i].dailyRentalRate = movie.rate;
+        this.movies[i].genre.name = movie.genre;
+        break;
+      }
+    }
+  };
 
+  searchHandler = searchString => {
+    this.searchString = searchString;
+    this.pageHandler();
+  };
   render() {
     return (
       <React.Fragment>
@@ -164,6 +191,7 @@ class App extends Component {
                     pager={this.pager}
                     onLike={this.likeHandler}
                     onToggle={this.toggleHandler}
+                    onSearch={this.searchHandler}
                     {...props}
                   />
                   <Pagination pager={this.pager} onPage={this.pageHandler} />
@@ -179,8 +207,9 @@ class App extends Component {
               render={props => (
                 <MovieForm
                   onGet={this.getMovieHandler}
-                  {...props}
                   onAdd={this.addMovieHandler}
+                  onEdit={this.editHandler}
+                  {...props}
                 />
               )}
             />

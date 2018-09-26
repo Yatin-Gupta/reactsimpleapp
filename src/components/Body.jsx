@@ -2,13 +2,43 @@ import React, { Component } from "react";
 import Genre from "./common/Genre";
 import TableHeader from "./TableHeader";
 import Movies from "./Movies";
+import Search from "./common/Search";
 
 class Body extends Component {
-  render() {
-    let countMovies = this.props.renderMovies.length;
-    if (countMovies === 0) {
-      return;
+  renderTable = () => {
+    if (this.props.renderMovies.length > 0) {
+      return (
+        <React.Fragment>
+          <thead>
+            <TableHeader
+              sorter={this.props.sorter}
+              onToggle={this.props.onToggle}
+            />
+          </thead>
+          <tbody>
+            <Movies
+              pager={this.props.pager}
+              onLike={this.props.onLike}
+              movies={this.props.renderMovies}
+            />
+          </tbody>
+        </React.Fragment>
+      );
+    } else {
+      return (
+        <React.Fragment>
+          <thead>
+            <TableHeader
+              sorter={this.props.sorter}
+              onToggle={this.props.onToggle}
+            />
+          </thead>
+        </React.Fragment>
+      );
     }
+  };
+
+  render() {
     return (
       <React.Fragment>
         <div className="row">
@@ -16,27 +46,14 @@ class Body extends Component {
             <Genre genre={this.props.genre} onGenre={this.props.onGenre} />
           </div>
           <div className="col">
+            <Search onSearch={this.props.onSearch} />
             <button
               className="btn btn-primary"
               onClick={() => this.props.history.push("/movies/new")}
             >
               New
             </button>
-            <table className="table">
-              <thead>
-                <TableHeader
-                  sorter={this.props.sorter}
-                  onToggle={this.props.onToggle}
-                />
-              </thead>
-              <tbody>
-                <Movies
-                  pager={this.props.pager}
-                  onLike={this.props.onLike}
-                  movies={this.props.renderMovies}
-                />
-              </tbody>
-            </table>
+            <table className="table">{this.renderTable()}</table>
           </div>
         </div>
       </React.Fragment>
