@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import Navbar from "./components/common/Navbar";
 import Pagination from "./components/common/Pagination";
-import { getMovies } from "./services/movies.service";
-import { getGenres } from "./services/genres.service";
+import Movie from "./services/movie.service";
+import Genre from "./services/genre.service";
 import _ from "lodash";
 import paginate from "./utils/paginate";
 import sortData from "./utils/sort";
@@ -14,16 +14,21 @@ import { Route, Redirect, Switch } from "react-router-dom";
 import MovieForm from "./components/MovieForm";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 class App extends Component {
   movies = [];
   state = {
-    renderMovies: [],
-    genre: {
-      selectedGenre: "All",
-      genres: getGenres()
-    }
+    renderMovies: []
   };
+
+  genre = {
+    selectedGenre: "All",
+    genres: []
+  };
+
+  searchString = "";
 
   sorter = {
     fields: [
@@ -41,18 +46,10 @@ class App extends Component {
     selectedPage: 1
   };
 
-  searchString = "";
-
-  constructor() {
-    super();
-    this.movies = getMovies();
-    this.state.renderMovies = this.movies.slice(0, this.pager.moviesPerPage);
-    //console.log(this.state.pager.paginatedMovies[0] === this.state.movies[0]);true;//this adds
-    // advantage that if paginatedMovies object is changed then movies object also get changed
-    // automatically.
-    this.pager.noOfPages = Math.ceil(
-      this.movies.length / this.pager.moviesPerPage
-    );
+  async componentDidMount() {
+    this.movies = await Movie.getMovies();
+    this.genre.genres = await Genre.getGenres();
+    this.pageHandler(this.pager.selectedPage);
   }
 
   toggleHandler = clickedHead => {
@@ -94,9 +91,9 @@ class App extends Component {
       });
     }
     let filteredMovies = actualMovies;
-    if (thisState.genre.selectedGenre !== "All") {
+    if (this.genre.selectedGenre !== "All") {
       filteredMovies = filteredMovies.filter(movie => {
-        if (movie.genre.name === this.state.genre.selectedGenre) return movie;
+        if (movie.genre.name === this.genre.selectedGenre) return movie;
       });
     }
     let sortedFilteredMovies = sortData(filteredMovies, this.sorter, {
@@ -119,16 +116,16 @@ class App extends Component {
   };
 
   genreHandler = genre => {
-    let newGenre = this.state.genre;
+    let newGenre = this.genre;
     newGenre.selectedGenre = genre;
     this.setState({ genre: newGenre });
     this.pager.selectedPage = 1;
     this.pageHandler(this.pager.selectedPage);
   };
 
-  addMovieHandler = movie => {
+  addMovieHandler = async movie => {
     let saveMovie = {};
-    saveMovie._id = Date.now().toString();
+    //saveMovie._id = Date.now().toString();
     saveMovie.title = movie.title;
     saveMovie.numberInStock = movie.noInStock;
     saveMovie.dailyRentalRate = movie.rate;
@@ -139,6 +136,7 @@ class App extends Component {
       }
     }
     this.movies.push(saveMovie);
+    setTimeout(await Movie.add(saveMovie), 0);
   };
 
   getMovieHandler = movieTitle => {
@@ -170,13 +168,18 @@ class App extends Component {
   render() {
     return (
       <React.Fragment>
+        <ToastContainer />
         <div className="container">
           <Navbar totalMovies={this.movies.length} />
           <Switch>
             <Route
               path="/movies/new"
               render={props => (
-                <MovieForm {...props} onAdd={this.addMovieHandler} />
+                <MovieForm
+                  {...props}
+                  onAdd={this.addMovieHandler}
+                  genres={this.genre.genres}
+                />
               )}
             />
             <Route
@@ -185,7 +188,7 @@ class App extends Component {
                 <React.Fragment>
                   <Body
                     renderMovies={this.state.renderMovies}
-                    genre={this.state.genre}
+                    genre={this.genre}
                     onGenre={this.genreHandler}
                     sorter={this.sorter}
                     pager={this.pager}

@@ -24,7 +24,7 @@ class MovieForm extends Component {
       .required()
       .label("Title"),
     genre: Joi.string()
-      .valid("Action", "Comedy", "Thriller")
+      .valid(...this.props.genres)
       .required()
       .label("Genre"),
     noInStock: Joi.number()
@@ -160,7 +160,7 @@ class MovieForm extends Component {
             errors={this.getErrorByField("title")}
           />
           <Select
-            genres={["Action", "Comedy", "Thriller"]}
+            genres={this.props.genres.slice(1)}
             name="genre"
             id="genre"
             defaultValue={this.state.account.genre}
