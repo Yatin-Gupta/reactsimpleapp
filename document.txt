@@ -1,0 +1,237 @@
+1. In React application can be divided into Components. One is App Component that is application
+component and other components are child component of it.
+
+React is bunch of Development Server, Webpack(for creating JS bundle of files) and Babel(for making JS code 2015+ compatible)
+
+2. Like for twitter app, App component can be breaken into NavBar, Profile, Trends, Feed.
+and Feed component can be breaken into Tweet and Like.
+
+3. A component is implemented in form of Javascript class and each class has some state and 
+render method. state is data that we want to display when render method is called. and render method
+tells what ui should look like. 
+
+4. Output of render method is ReactElement which is simple Javascript Object that maps to DOMElement.
+
+5. React keeps lightweight representation of DOM in form of DOMElement. It is also called VirtualDOM.
+when we change state of component, we get new ReactElement. Then children of this new ReactElement,
+checks what is changed, and update DOMElement children accordingly to be in sync with changes.
+
+6. React called react because once state changes, React react to it and updates the DOM.
+
+7. Both React and Angular are same in terms of component based architecture however Angular is 
+Framework a complete solution while react is library. React responsibility is to render view and
+ensure view is in sync with different state of application.
+
+8. To start working with it we have installed 2 extensions:
+-> Simple React Snippets by burke holland
+-> Prettier - Code formatter by Esben Petersen
+-> Go to File > Preference > Setting and from there set "Format on Save"
+
+9. You need to install npm package create-react-app.
+
+10. Once you creatr app by create-react-app you get Development Server, Webpack and Babel.
+Babel is toolchain that is mainly used to convert ECMAScript 2015+ code into a backwards compatible version of JavaScript in current and older browsers or environments. 
+Transform syntax
+Polyfill features that are missing in your target environment (through @babel/polyfill)
+Source code transformations (codemods)
+
+11. <div id="root"> is container for react application.
+
+12. In React HTML written in render method of component is neither string nor HTML, but it is JSX stands for 
+Javascript XML. We need to pass this JSX to babbel, babbel will convert this JSX into plain javascript.
+
+13. we can check same at https://babeljs.io/repl
+
+14. This line "const html = <h1> Hello world </h1>" translates to:
+"use strict";
+
+var html = React.createElement(
+  "h1",
+  null,
+  " Hello world "
+);
+which browser can understand.
+
+registerServiceWorker.js serves pages from local cache.
+
+15. Even though we not directly use React in code like if I write code as
+let some = <h1>HW</h1>
+but because this code is traslated to React.createElement by babbel, its important to import React event in that file also.
+
+16. Whenever we save app, our app automatically compiled this is called Hot Model Reloading.
+
+17. To render we require ReactDOM
+
+18. when returning JSX expression using return statement, we must keep it in parenthesis. This is because of automatic semicolon insertion in JS. like
+
+return 
+<h1>Hello World</h1>; will be treated in JS as:
+
+return;
+<h1>Hello World</h1>
+
+but to avoid such situation we should write it as:
+return (
+<h1>hw</h1>
+)
+
+Also when writing many html statements(more than one), it is important to have at least one parent. Parent is identified by 
+div in JSX by babbel. So provide at least one div to provide multiple HTML statements.
+Now if you don't want this extra div so we can replace this extra div with React.Fragment
+
+we could not use "class" property in JSX but we can use className as ulimately JSX is a javascript and class is a 
+reserved keyword in it.
+
+CTRL + D to activate 2 cursor simulataneously
+
+19. With map function each tag must have unique value. This unique value just creates error in console not visually seem impacted.
+This key is required by react to keep virtual dom in sync with html dom. So you need to put key value for each element as shown:
+<ul>
+          {this.state.tags.map(tag => (
+            <li key={tag}>{tag}</li>
+          ))}
+        </ul>
+		
+There are if else in JSX as JSX is not a template engine. However we can use logical operators &&, || in JSX by which we can induce
+similar functionality.
+Note:
+true && "Hi" is Hi
+Hi && true is true
+
+19. In event handlers we don;t have accesss to this.
+
+20. In React when state is changed, new ReactElement or virtual DOM is generated, then react compare new virtual DOM and old virtual DOM, 
+and only change that part of DOM that actually changed and don't change it what has not changed due to change in state in new virtual DOM.
+
+21. Every React component has property called props.
+
+22. import React, { Component } from "react"; // shortcut to create it imrc
+
+23. 
+// Stateless functional Component. Developers prefer to create these components for
+// components that don't have state. In this components react has to pass props in it
+// and we don't use this.props but instead just props.
+// shortcut to create it on VSC is sfc
+const NavbarComponent = props => {
+  return (
+    <React.Fragment>
+      <nav className="navbar navbar-light bg-light">
+        <a className="navbar-brand" href="#">
+          Navbar {props.counterLength}
+        </a>
+      </nav>
+    </React.Fragment>
+  );
+};
+
+export default NavbarComponent;
+
+As we are just interested in getting counterLength thus we can write(using object destructuring) it as:
+
+const NavbarComponent = ({counterLength}) => {
+  return (
+    <React.Fragment>
+      <nav className="navbar navbar-light bg-light">
+        <a className="navbar-brand" href="#">
+          Navbar {counterLength}
+        </a>
+      </nav>
+    </React.Fragment>
+  );
+};
+
+Object Destructuring can also works this way as:
+
+const { onReset, counters, onDelete, onIncrement } = this.props;
+
+24.
+// class NavbarComponent extends Component { // shortcut to create class is cc
+
+25. Component goes through lifecycle hooks phases as:
+-> Mounting Phase: This is the phase when component is created and inserted into DOM.
+In Mounting phase we have 3 lifecycle hooks as:
+constructor(when component created)
+render
+componentDidMount(when component rendered to DOM): it is perfect place to make AJAX calls to get data from server and then we can called setState
+to change state of application.
+react will call these methods in order as given
+
+-> Update: This happen when state or props get changed. Here we have 2 hooks as:
+render
+componentDidUpdate : In it we can get prevProps and prevState and can use this.props to get current props and state. It will be called 
+for every component that is rendered, but prevProp and this.prop is only different for that component that is changed by user.
+
+-> Unmount phase: This is when component is removed from DOM. It have one lifecycle hook as:
+componentWillUnmount
+
+React will automatically called these methods.
+
+26. this.setState() can only be called in render or when component is placed in DOM, not in constructor. In constructor,
+you don't need to call setState, you can directly change state to change it. 
+this.props can only be accessed in constructor when it is written as:
+constructor(props) {
+    super(props);
+    console.log("Counters Component constructor");
+    console.log(this.props);
+}
+if props is not passed to constructor or super method inside constructor then this.props return undefined(not this but this.props)
+
+27.
+We cannot use lifecycle hooks in Stateless Functional Components.
+
+28.
+When a component is rendered, all its children rendered recursively
+
+29. Suppose there are 3 components as: A, B and C such that A->B->C, where A holds state and remaining 2 are 
+stateless, then if any event occur 
+
+30. When we want to change the configuration of packages in react like webapp. For it we can use eject. We can use eject to 
+customize all tools and configuration that comes with this project. When we run
+npm run eject
+then all the dependencies that were handling in background handled in background previously comes in package.json, and a 
+seperate config directory also forms, which has code for webpack and all that. We should change it only when know what we are doing.
+
+Firebase is used for backend development provided by google.
+
+Internally classes are objects in Javascript.
+
+there are 2 kind of exports in javascript named and default export. Name export are those in which we import by 
+import { Teacher } from "./Teacher";
+for default exports we import by
+import Teacher from "./Teacher";
+
+It is possible that module has default export as well as bunch of named export.
+
+Concerning the default export, there is only a single default export per module. This value is to be considered as the 
+“main” exported value since it will be the simplest to import.
+
+Whenever browser send AJAX request from one domain to other domain, then for security reason it also send Option 
+request with 204 status code along with request that is intended to pass.
+
+we use axios patch to update one or more property and put to update all property.
+
+There are 2 types of updates as:
+Pessimistic Update: When we wait for response coming to server and then render data. If in case response not come then component will not be rendered.
+
+Optimistic Update: In this we assume that response succeed. So we update UI first and then request server, then if error comes then we revert the UI 
+
+There are 2 type of errors:
+
+Expected Errors: Also known as Client errors. There are errors that are 4XX type. like 404 : given path(item) not found,
+like 400 (bad request): when form validation fails we need to display errors.
+
+Unexpected(network down, server down, db down, bug) which should not occur.
+We need to handle unexpected errors differently i.e 
+- we need to log them so that we can find cause for errors that should not occur
+- Display a generic and friendly error message to user
+
+for expected error (we get exception object in catch. That has request and response. For unexpected errors response is null)
+request property is not null if request successfully submitted to server, else it is also null.
+
+By axios we can intercept request that goes to server and response that comes from server. We can have success and error actions or call back in it. This error
+call back is called first before calling catch. This can be used to handle bot expected and unexpected errors, after it you require try and catch
+not for logging but to do specific task on error like setting post to original post.
+
+
+
+
