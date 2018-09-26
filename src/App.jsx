@@ -132,6 +132,29 @@ class App extends Component {
     this.movies.push(saveMovie);
   };
 
+  getMovieHandler = movieTitle => {
+    let noOfMovies = this.movies.length;
+    for (let i = 0; i < noOfMovies; ++i) {
+      if (this.movies[i].title === movieTitle) {
+        return this.movies[i];
+      }
+    }
+    return {};
+  };
+
+  editHandler = movie => {
+    let saveMovie = {};
+    for (let i = 0; i < this.movies.length; ++i) {
+      if (this.movies[i]._id === movie.id) {
+        this.movies[i].title = movie.title;
+        this.movies[i].numberInStock = movie.noInStock;
+        this.movies[i].dailyRentalRate = movie.rate;
+        this.movies[i].genre.name = movie.genre;
+        break;
+      }
+    }
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -168,7 +191,13 @@ class App extends Component {
             <Route path="/rentals" component={Rentals} />
             <Route
               path="/movie/:name"
-              render={props => <MovieForm movies={this.movies} {...props} />}
+              render={props => (
+                <MovieForm
+                  onGet={this.getMovieHandler}
+                  onEdit={this.editHandler}
+                  {...props}
+                />
+              )}
             />
             <Route path="/not-found" component={NotFound} />
             <Redirect from="/" exact to="/movies" />

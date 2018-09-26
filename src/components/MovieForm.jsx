@@ -17,6 +17,7 @@ class MovieForm extends Component {
   };
 
   schema = {
+    id: Joi.string(),
     title: Joi.string()
       .min(5)
       .max(30)
@@ -35,6 +36,27 @@ class MovieForm extends Component {
       .required()
       .label("Rate")
   };
+
+  renderStatus = "new";
+
+  constructor(props) {
+    super(props);
+    if (props.match.url.indexOf("/new") === -1) {
+      let movie = this.props.onGet(this.props.match.params.name);
+      if (_.isEmpty(movie)) {
+        props.history.replace("/not-found");
+      }
+      this.state.account.title = movie.title;
+      this.state.account.noInStock = movie.numberInStock;
+      this.state.account.rate = movie.dailyRentalRate;
+      this.state.account.genre = movie.genre.name;
+      this.state.account.id = movie._id;
+      this.renderStatus = "edit";
+    } else {
+      delete this.state.account.id;
+      this.renderStatus = "new";
+    }
+  }
 
   getMovieByName = (name, movies) => {
     let index = _.findIndex(movies, { title: name });
@@ -67,7 +89,8 @@ class MovieForm extends Component {
     });
     this.setState({ errors });
     if (formErrors.length === 0) {
-      this.props.onAdd(this.state.account);
+      if (this.renderStatus === "new") this.props.onAdd(this.state.account);
+      else this.props.onEdit(this.state.account);
     }
     this.props.history.replace("/movies");
     // call to server made
@@ -144,7 +167,9 @@ class MovieForm extends Component {
           />
           <div className="form-group">
             <div className="col-sm-offset-2 col-sm-10">
-              {this.getButton("Add Movie")}
+              {this.renderStatus === "new"
+                ? this.getButton("Add Movie")
+                : this.getButton("Edit Movie")}
             </div>
           </div>
         </form>
