@@ -122,7 +122,6 @@ class App extends Component {
     saveMovie.title = movie.title;
     saveMovie.numberInStock = movie.noInStock;
     saveMovie.dailyRentalRate = movie.rate;
-    let i = 0;
     for (let i = 0; i < this.movies.length; ++i) {
       if (this.movies[i].genre.name === movie.genre) {
         saveMovie.genre = this.movies[i].genre;
@@ -130,6 +129,15 @@ class App extends Component {
       }
     }
     this.movies.push(saveMovie);
+  };
+
+  getMovieHandler = movieTitle => {
+    for (let i = 0; i < this.movies.length; ++i) {
+      if (this.movies[i].title === movieTitle) {
+        return this.movies[i];
+      }
+    }
+    return {};
   };
 
   render() {
@@ -168,7 +176,13 @@ class App extends Component {
             <Route path="/rentals" component={Rentals} />
             <Route
               path="/movie/:name"
-              render={props => <MovieForm movies={this.movies} {...props} />}
+              render={props => (
+                <MovieForm
+                  onGet={this.getMovieHandler}
+                  {...props}
+                  onAdd={this.addMovieHandler}
+                />
+              )}
             />
             <Route path="/not-found" component={NotFound} />
             <Redirect from="/" exact to="/movies" />

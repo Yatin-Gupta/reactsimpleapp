@@ -98,6 +98,29 @@ class MovieForm extends Component {
   render() {
     //let movieName = this.props.match.params.name;
     //let movie = this.getMovieByName(movieName, this.props.movies);
+    if (this.props.match) {
+      let url = this.props.match.url;
+      let renderStatus = "edit";
+      let nameParam = "";
+      let movie = {};
+      if (url.indexOf("/new") > -1) {
+        renderStatus = "new";
+      }
+      if (renderStatus === "edit") {
+        nameParam = this.props.match.params.name;
+        movie = this.props.onGet(nameParam);
+        if (_.isEmpty(movie)) {
+          return <h1>No Movie with name {nameParam} found</h1>;
+        }
+        let newAccount = {};
+        newAccount.title = movie.title;
+        newAccount.noInStock = movie.numberInStock;
+        newAccount.rate = movie.dailyRentalRate;
+        newAccount.genre = movie.genre.name;
+        this.state.account = newAccount;
+        //this.setState({ account: newAccount });
+      }
+    }
 
     return (
       <React.Fragment>
@@ -144,7 +167,7 @@ class MovieForm extends Component {
           />
           <div className="form-group">
             <div className="col-sm-offset-2 col-sm-10">
-              {this.getButton("Add Movie")}
+              {this.getButton("Save Movie")}
             </div>
           </div>
         </form>
