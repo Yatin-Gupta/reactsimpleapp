@@ -14,6 +14,7 @@ import { Route, Redirect, Switch } from "react-router-dom";
 import MovieForm from "./components/MovieForm";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import UserService from "./services/user.service";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -198,6 +199,33 @@ class App extends Component {
     this.searchString = searchString;
     this.pageHandler();
   };
+
+  addUserHandler = async user => {
+    let saveUser = {};
+    saveUser["email"] = user["username"];
+    saveUser["password"] = user["password"];
+    saveUser["name"] = user["name"];
+    let response = await UserService.add(saveUser);
+    if (response > -1) {
+      console.log("New User Id: ", response);
+    } else {
+      console.log("Unable to add User");
+    }
+  };
+
+  loginHandler = async user => {
+    let saveUser = {};
+    saveUser["email"] = user["username"];
+    saveUser["password"] = user["password"];
+    let response = await UserService.getAuthToken(saveUser);
+    if (response !== -1) {
+      localStorage.setItem("token", response);
+      console.log("Web Token: ", localStorage.getItem("token"));
+    } else {
+      console.log("Unable to get web token");
+    }
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -234,8 +262,18 @@ class App extends Component {
                 </React.Fragment>
               )}
             />
-            <Route path="/login" component={Login} />
-            <Route path="/register" component={Register} />
+            <Route
+              path="/login"
+              render={props => (
+                <Login {...props} loginUser={this.loginHandler} />
+              )}
+            />
+            <Route
+              path="/register"
+              render={props => (
+                <Register {...props} addUser={this.addUserHandler} />
+              )}
+            />
             <Route path="/customers" component={Customers} />
             <Route path="/rentals" component={Rentals} />
             <Route

@@ -35,6 +35,11 @@ class Register extends Component {
       errors[error.key] = error.value;
     });
     this.setState({ errors });
+
+    if (_.isEmpty(errors)) {
+      this.props.addUser(this.state.account);
+      this.props.history.push("/movies");
+    }
     // call to server made
   };
 
