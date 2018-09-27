@@ -47,12 +47,18 @@ class Body extends Component {
           </div>
           <div className="col">
             <Search onSearch={this.props.onSearch} />
-            <button
-              className="btn btn-primary"
-              onClick={() => this.props.history.push("/movies/new")}
-            >
-              New
-            </button>
+            {this.props.user !== null ? (
+              <React.Fragment>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => this.props.history.push("/movies/new")}
+                >
+                  New
+                </button>
+              </React.Fragment>
+            ) : (
+              <React.Fragment />
+            )}
             <table className="table">{this.renderTable()}</table>
           </div>
         </div>

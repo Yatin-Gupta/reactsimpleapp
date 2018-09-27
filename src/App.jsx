@@ -242,13 +242,19 @@ class App extends Component {
           <Switch>
             <Route
               path="/movies/new"
-              render={props => (
-                <MovieForm
-                  {...props}
-                  onAdd={this.addMovieHandler}
-                  onGenres={this.getGenresHandler}
-                />
-              )}
+              render={props => {
+                if (UserService.getUserByAuthToken()) {
+                  return (
+                    <MovieForm
+                      {...props}
+                      onAdd={this.addMovieHandler}
+                      onGenres={this.getGenresHandler}
+                    />
+                  );
+                } else {
+                  return <Redirect to="/login" />;
+                }
+              }}
             />
             <Route
               path="/movies"
@@ -260,6 +266,7 @@ class App extends Component {
                     onGenre={this.genreHandler}
                     sorter={this.sorter}
                     pager={this.pager}
+                    user={UserService.getUserByAuthToken()}
                     onLike={this.likeHandler}
                     onToggle={this.toggleHandler}
                     onSearch={this.searchHandler}

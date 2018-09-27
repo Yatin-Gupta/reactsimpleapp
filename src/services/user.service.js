@@ -23,6 +23,7 @@ const UserService = {
     if (response.data) {
       if (response.headers["x-auth-token"] !== undefined) {
         localStorage.setItem(tokenKey, response.headers["x-auth-token"]);
+        http.setJwt(response.headers["x-auth-token"]);
       }
       return response.data._id;
     }
@@ -38,6 +39,7 @@ const UserService = {
       console.log(response);
       if (response.data) {
         localStorage.setItem(tokenKey, response.data);
+        http.setJwt(response.data);
         return response.data;
       }
     } catch (exception) {
@@ -58,6 +60,9 @@ const UserService = {
     if (localStorage.getItem(tokenKey)) {
       localStorage.removeItem(tokenKey);
     }
+  },
+  getJwt: () => {
+    return localStorage.getItem(tokenKey);
   }
 };
 
