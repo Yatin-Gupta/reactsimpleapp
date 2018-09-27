@@ -71,8 +71,8 @@ class Login extends Component {
     this.setState({ errors });
     if (_.isEmpty(errors)) {
       this.props.loginUser(this.state.account);
-      this.props.history.push("/movies");
     }
+    window.location = "/";
     // call to server made
   };
   //   validatePropertyHandler = (name, value) => {

@@ -13,6 +13,7 @@ import NotFound from "./components/NotFound";
 import { Route, Redirect, Switch } from "react-router-dom";
 import MovieForm from "./components/MovieForm";
 import Login from "./components/Login";
+import Logout from "./components/Logout";
 import Register from "./components/Register";
 import UserService from "./services/user.service";
 import { ToastContainer } from "react-toastify";
@@ -206,7 +207,7 @@ class App extends Component {
     saveUser["password"] = user["password"];
     saveUser["name"] = user["name"];
     let response = await UserService.add(saveUser);
-    if (response > -1) {
+    if (response !== -1) {
       console.log("New User Id: ", response);
     } else {
       console.log("Unable to add User");
@@ -219,11 +220,14 @@ class App extends Component {
     saveUser["password"] = user["password"];
     let response = await UserService.getAuthToken(saveUser);
     if (response !== -1) {
-      localStorage.setItem("token", response);
-      console.log("Web Token: ", localStorage.getItem("token"));
+      console.log("Logged In");
     } else {
       console.log("Unable to get web token");
     }
+  };
+
+  logoutHandler = () => {
+    UserService.logout();
   };
 
   render() {
@@ -231,7 +235,10 @@ class App extends Component {
       <React.Fragment>
         <ToastContainer />
         <div className="container">
-          <Navbar totalMovies={this.movies.length} />
+          <Navbar
+            totalMovies={this.movies.length}
+            user={UserService.getUserByAuthToken()}
+          />
           <Switch>
             <Route
               path="/movies/new"
@@ -266,6 +273,12 @@ class App extends Component {
               path="/login"
               render={props => (
                 <Login {...props} loginUser={this.loginHandler} />
+              )}
+            />
+            <Route
+              path="/logout"
+              render={props => (
+                <Logout {...props} logoutUser={this.logoutHandler} />
               )}
             />
             <Route

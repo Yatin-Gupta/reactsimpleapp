@@ -38,9 +38,11 @@ class Register extends Component {
 
     if (_.isEmpty(errors)) {
       this.props.addUser(this.state.account);
-      this.props.history.push("/movies");
+      //this.props.history.push("/movies");
     }
     // call to server made
+
+    window.location = "/";
   };
 
   changeHandler = e => {

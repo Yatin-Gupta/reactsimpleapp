@@ -14,7 +14,7 @@ class Navbar extends Component {
       <React.Fragment>
         <nav className="navbar navbar-expand-lg navbar-light bg-light">
           <Link className="navbar-brand" to="/">
-            Yatin
+            {this.props.user ? this.props.user.name : "NoUser"}
           </Link>
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav mr-auto">
@@ -33,16 +33,33 @@ class Navbar extends Component {
                   Rentals
                 </NavLink>
               </li>
-              <li className="nav-item active">
-                <NavLink className="nav-link" to="/login">
-                  Login
-                </NavLink>
-              </li>
-              <li className="nav-item active">
-                <NavLink className="nav-link" to="/register">
-                  Register
-                </NavLink>
-              </li>
+              {this.props.user === null ? (
+                <React.Fragment>
+                  <li className="nav-item active">
+                    <NavLink className="nav-link" to="/login">
+                      Login
+                    </NavLink>
+                  </li>
+                  <li className="nav-item active">
+                    <NavLink className="nav-link" to="/register">
+                      Register
+                    </NavLink>
+                  </li>
+                </React.Fragment>
+              ) : (
+                <React.Fragment>
+                  <li className="nav-item active">
+                    <NavLink className="nav-link" to="/profile">
+                      Profile
+                    </NavLink>
+                  </li>
+                  <li className="nav-item active">
+                    <NavLink className="nav-link" to="/logout">
+                      Logout
+                    </NavLink>
+                  </li>
+                </React.Fragment>
+              )}
             </ul>
           </div>
         </nav>
