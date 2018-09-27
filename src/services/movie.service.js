@@ -17,7 +17,11 @@ const MovieService = {
     return {};
   },
   add: async movie => {
-    await http.post(movieEndpoint, movie);
+    let response = await http.post(movieEndpoint, movie);
+    if (response.data) {
+      return response.data._id;
+    }
+    return -1;
   },
   update: async (id, movie) => {
     await http.put(movieEndpoint + "/" + id, movie);

@@ -122,7 +122,7 @@ class App extends Component {
     this.pageHandler(this.pager.selectedPage);
   };
 
-  addMovieHandler = movie => {
+  addMovieHandler = async movie => {
     let saveMovie = {};
     //saveMovie._id = Date.now().toString();
     saveMovie.title = movie.title;
@@ -134,13 +134,17 @@ class App extends Component {
         break;
       }
     }
-    this.movies.push(saveMovie);
-    setTimeout(async () => {
-      let passMovie = { ...saveMovie };
-      passMovie.genreId = passMovie.genre._id;
-      delete passMovie.genre;
-      await MovieService.add(passMovie);
-    }, 0);
+    //setTimeout(async () => {
+    let passMovie = { ...saveMovie };
+    passMovie.genreId = passMovie.genre._id;
+    delete passMovie.genre;
+    let response = await MovieService.add(passMovie);
+    if (response !== -1) {
+      saveMovie._id = response;
+      this.movies.push(saveMovie);
+      this.pageHandler(this.pager.selectedPage);
+    }
+    //}, 0);
   };
 
   getMovieHandler = async movieId => {
