@@ -21,7 +21,7 @@ class Movies extends Component {
     return (
       <React.Fragment>
         {movies.map(movie => (
-          <tr key={movie.title}>
+          <tr key={movie._id}>
             <Movie
               movie={movie}
               counter={this.getCounter()}

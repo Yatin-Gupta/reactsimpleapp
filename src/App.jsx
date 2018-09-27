@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import Navbar from "./components/common/Navbar";
 import Pagination from "./components/common/Pagination";
-import Movie from "./services/movie.service";
-import Genre from "./services/genre.service";
+import MovieService from "./services/movie.service";
+import GenreService from "./services/genre.service";
 import _ from "lodash";
 import paginate from "./utils/paginate";
 import sortData from "./utils/sort";
@@ -47,8 +47,8 @@ class App extends Component {
   };
 
   async componentDidMount() {
-    this.movies = await Movie.getMovies();
-    this.genre.genres = await Genre.getGenres();
+    this.movies = await MovieService.getMovies();
+    this.genre.genres = await GenreService.getGenres();
     this.pageHandler(this.pager.selectedPage);
   }
 
@@ -83,6 +83,8 @@ class App extends Component {
   pageHandler = (pageCount = 1) => {
     const thisState = this.state;
     let actualMovies = [];
+    console.log("Page handler");
+    //console.log(this.movies);
     if (this.searchString.trim() === "") {
       actualMovies = this.movies;
     } else {
@@ -106,7 +108,6 @@ class App extends Component {
     );
     this.pager.selectedPage = pageCount;
     this.pager.noOfPages = resultPager.noOfPages;
-
     this.setState({
       renderMovies: sortedFilteredMovies.slice(
         resultPager.startIndex,
@@ -116,14 +117,12 @@ class App extends Component {
   };
 
   genreHandler = genre => {
-    let newGenre = this.genre;
-    newGenre.selectedGenre = genre;
-    this.setState({ genre: newGenre });
+    this.genre.selectedGenre = genre;
     this.pager.selectedPage = 1;
     this.pageHandler(this.pager.selectedPage);
   };
 
-  addMovieHandler = async movie => {
+  addMovieHandler = movie => {
     let saveMovie = {};
     //saveMovie._id = Date.now().toString();
     saveMovie.title = movie.title;
@@ -136,28 +135,58 @@ class App extends Component {
       }
     }
     this.movies.push(saveMovie);
-    setTimeout(await Movie.add(saveMovie), 0);
+    setTimeout(async () => {
+      let passMovie = { ...saveMovie };
+      passMovie.genreId = passMovie.genre._id;
+      delete passMovie.genre;
+      await MovieService.add(passMovie);
+    }, 0);
   };
 
-  getMovieHandler = movieTitle => {
-    let noOfMovies = this.movies.length;
-    for (let i = 0; i < noOfMovies; ++i) {
-      if (this.movies[i].title === movieTitle) {
-        return this.movies[i];
-      }
+  getMovieHandler = async movieId => {
+    let response = await MovieService.getMovie(movieId);
+    if (response) {
+      return response;
     }
     return {};
   };
-  editHandler = movie => {
-    let saveMovie = {};
-    for (let i = 0; i < this.movies.length; ++i) {
-      if (this.movies[i]._id === movie.id) {
-        this.movies[i].title = movie.title;
-        this.movies[i].numberInStock = movie.noInStock;
-        this.movies[i].dailyRentalRate = movie.rate;
-        this.movies[i].genre.name = movie.genre;
-        break;
+
+  getGenresHandler = async () => {
+    let response = await GenreService.getGenres();
+    if (response) {
+      return response.slice(1);
+    }
+    return [];
+  };
+
+  editHandler = async movie => {
+    let saveMovie = await MovieService.getMovie(movie.id);
+    if (!_.isEmpty(saveMovie)) {
+      saveMovie.title = movie.title;
+      saveMovie.numberInStock = movie.noInStock;
+      saveMovie.dailyRentalRate = movie.rate;
+      let genres = await GenreService.getGenresWithId();
+      for (let i = 0; i < genres.length; ++i) {
+        if (genres[i].name === movie.genre) {
+          saveMovie["genre"] = genres[i];
+          break;
+        }
       }
+      for (let i = 0; i < this.movies.length; ++i) {
+        if (this.movies[i]._id === saveMovie._id) {
+          this.movies[i] = { ...saveMovie };
+          break;
+        }
+      }
+      this.pageHandler(this.pager.selectedPage);
+      console.log(this.movies);
+      setTimeout(async () => {
+        saveMovie.genreId = saveMovie.genre._id;
+        let id = saveMovie._id;
+        delete saveMovie._id;
+        delete saveMovie.genre;
+        await MovieService.update(id, saveMovie);
+      }, 0);
     }
   };
 
@@ -178,7 +207,7 @@ class App extends Component {
                 <MovieForm
                   {...props}
                   onAdd={this.addMovieHandler}
-                  genres={this.genre.genres}
+                  onGenres={this.getGenresHandler}
                 />
               )}
             />
@@ -206,12 +235,13 @@ class App extends Component {
             <Route path="/customers" component={Customers} />
             <Route path="/rentals" component={Rentals} />
             <Route
-              path="/movie/:name"
+              path="/movie/:id"
+              exact
               render={props => (
                 <MovieForm
                   onGet={this.getMovieHandler}
-                  onAdd={this.addMovieHandler}
                   onEdit={this.editHandler}
+                  onGenres={this.getGenresHandler}
                   {...props}
                 />
               )}

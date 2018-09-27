@@ -1,7 +1,7 @@
 import http from "./httpService";
 import { genreEndpoint } from "../config.json";
 
-const Genre = {
+const GenreService = {
   getGenres: async () => {
     let response = await http.get(genreEndpoint);
     if (response.data) {
@@ -13,9 +13,13 @@ const Genre = {
     }
     return ["All"];
   },
-  getGenre: () => {
-    console.log("Get Genre");
+  getGenresWithId: async () => {
+    let response = await http.get(genreEndpoint);
+    if (response.data) {
+      return response.data;
+    }
+    return [];
   }
 };
 
-export default Genre;
+export default GenreService;

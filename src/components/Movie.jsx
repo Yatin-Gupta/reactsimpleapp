@@ -16,7 +16,7 @@ class Movie extends Component {
       <React.Fragment>
         <th scope="row">{this.props.counter}</th>
         <td>
-          <Link to={"/movie/" + title}>{title}</Link>
+          <Link to={"/movie/" + _id}>{title}</Link>
         </td>
         <td>{genre.name}</td>
         <td>{numberInStock}</td>

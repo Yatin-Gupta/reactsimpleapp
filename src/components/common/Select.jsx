@@ -6,6 +6,23 @@ class Select extends Component {
     if (errors === "") return;
     return <div className="text-danger">{errors}</div>;
   };
+  renderOptions = (defaultValue, genres) => {
+    return genres.map(genre => {
+      if (defaultValue === genre) {
+        return (
+          <option key={genre} value={genre} selected>
+            {genre}
+          </option>
+        );
+      } else {
+        return (
+          <option key={genre} value={genre}>
+            {genre}
+          </option>
+        );
+      }
+    });
+  };
   render() {
     const { label, id, onChange, defaultValue, name, errors } = this.props;
     return (
@@ -22,11 +39,7 @@ class Select extends Component {
               defaultValue={defaultValue}
               onChange={onChange}
             >
-              {this.props.genres.map(genre => (
-                <option key={genre} value={genre}>
-                  {genre}
-                </option>
-              ))}
+              {this.renderOptions(defaultValue, this.props.genres)}
             </select>
             {this.renderErrors(errors)}
           </div>

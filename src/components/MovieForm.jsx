@@ -13,50 +13,67 @@ class MovieForm extends Component {
       noInStock: 0,
       rate: ""
     },
+    genres: [],
     errors: {}
   };
 
-  schema = {
-    id: Joi.string(),
-    title: Joi.string()
-      .min(5)
-      .max(30)
-      .required()
-      .label("Title"),
-    genre: Joi.string()
-      .valid(...this.props.genres)
-      .required()
-      .label("Genre"),
-    noInStock: Joi.number()
-      .integer()
-      .min(0)
-      .required()
-      .label("Number in Stock"),
-    rate: Joi.number()
-      .required()
-      .label("Rate")
-  };
+  schema = {};
 
   renderStatus = "new";
 
   constructor(props) {
     super(props);
     if (props.match.url.indexOf("/new") === -1) {
-      let movie = this.props.onGet(this.props.match.params.name);
-      if (_.isEmpty(movie)) {
-        props.history.replace("/not-found");
-      }
-      this.state.account.title = movie.title;
-      this.state.account.noInStock = movie.numberInStock;
-      this.state.account.rate = movie.dailyRentalRate;
-      this.state.account.genre = movie.genre.name;
-      this.state.account.id = movie._id;
       this.renderStatus = "edit";
     } else {
       delete this.state.account.id;
       this.renderStatus = "new";
     }
   }
+
+  componentDidMount = async () => {
+    const props = this.props;
+    if (this.renderStatus === "edit") {
+      let paramId = this.props.match.params.id;
+      let movie = await this.props.onGet(paramId);
+      if (_.isEmpty(movie)) {
+        props.history.replace("/not-found");
+      }
+
+      let account = {};
+      account.title = movie.title;
+      account.noInStock = movie.numberInStock;
+      account.rate = movie.dailyRentalRate;
+      account.genre = movie.genre.name;
+      account.id = movie._id;
+      this.setState({ account });
+    } else {
+      delete this.state.account.id;
+      this.renderStatus = "new";
+    }
+    let genres = await props.onGenres();
+    this.schema = {
+      id: Joi.string(),
+      title: Joi.string()
+        .min(5)
+        .max(30)
+        .required()
+        .label("Title"),
+      genre: Joi.string()
+        .valid(...genres)
+        .required()
+        .label("Genre"),
+      noInStock: Joi.number()
+        .integer()
+        .min(0)
+        .required()
+        .label("Number in Stock"),
+      rate: Joi.number()
+        .required()
+        .label("Rate")
+    };
+    this.setState({ genres });
+  };
 
   getMovieByName = (name, movies) => {
     let index = _.findIndex(movies, { title: name });
@@ -121,29 +138,29 @@ class MovieForm extends Component {
   render() {
     //let movieName = this.props.match.params.name;
     //let movie = this.getMovieByName(movieName, this.props.movies);
-    if (this.props.match) {
-      let url = this.props.match.url;
-      let renderStatus = "edit";
-      let nameParam = "";
-      let movie = {};
-      if (url.indexOf("/new") > -1) {
-        renderStatus = "new";
-      }
-      if (renderStatus === "edit") {
-        nameParam = this.props.match.params.name;
-        movie = this.props.onGet(nameParam);
-        if (_.isEmpty(movie)) {
-          return <h1>No Movie with name {nameParam} found</h1>;
-        }
-        let newAccount = {};
-        newAccount.title = movie.title;
-        newAccount.noInStock = movie.numberInStock;
-        newAccount.rate = movie.dailyRentalRate;
-        newAccount.genre = movie.genre.name;
-        this.state.account = newAccount;
-        //this.setState({ account: newAccount });
-      }
-    }
+    // if (this.props.match) {
+    //   let url = this.props.match.url;
+    //   let renderStatus = "edit";
+    //   let nameParam = "";
+    //   let movie = {};
+    //   if (url.indexOf("/new") > -1) {
+    //     renderStatus = "new";
+    //   }
+    //   if (renderStatus === "edit") {
+    //     nameParam = this.props.match.params.name;
+    //     movie = this.props.onGet(nameParam);
+    //     if (_.isEmpty(movie)) {
+    //       return <h1>No Movie with name {nameParam} found</h1>;
+    //     }
+    //     let newAccount = {};
+    //     newAccount.title = movie.title;
+    //     newAccount.noInStock = movie.numberInStock;
+    //     newAccount.rate = movie.dailyRentalRate;
+    //     newAccount.genre = movie.genre.name;
+    //     this.state.account = newAccount;
+    //     //this.setState({ account: newAccount });
+    //   }
+    // }
 
     return (
       <React.Fragment>
@@ -160,7 +177,7 @@ class MovieForm extends Component {
             errors={this.getErrorByField("title")}
           />
           <Select
-            genres={this.props.genres.slice(1)}
+            genres={this.state.genres}
             name="genre"
             id="genre"
             defaultValue={this.state.account.genre}
